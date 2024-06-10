@@ -6,6 +6,8 @@ from discord import app_commands
 from dotenv import load_dotenv
 from discord.ext import commands
 import db
+import random
+import json
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -30,12 +32,44 @@ def check_command_permission(interaction: discord.Interaction):
     return False
 
 
+@client.tree.command()
+async def kiss(interaction: discord.Interaction,member:discord.Member):
+    """Kiss command"""
+    await interaction.response.defer(ephemeral=True)
+    print('inside Kiss')
+    if member.id==interaction.user.id:
+        await interaction.followup.send("you can't kiss yourself",ephemeral=True)
+        return
+    if member.bot==True:
+        await interaction.followup.send("You can't kiss a bot",ephemeral=True)
+        return
+
+    guild_id=str(interaction.guild_id)
+    embed=discord.Embed(color=db.get(guild_id,db.KEYS.EMBED_COLOR))
+    embed.description=f'<@{member.id}>'
+    gifs=[]
+    with open("gifs/kisses.json") as f:
+        gifs=json.load(f)
+    url=gifs[random.randint(0,len(gifs)-1)]
+    print(f'url:{url},len:{len(gifs)}')
+    embed.set_image(url=url)
+    await interaction.channel.send(embed=embed)
+    await interaction.followup.send('done')
+    
+    #for url in gifs:
+    #    embed.description=url
+    #    embed.set_image(url=url)
+    #    await interaction.channel.send(embed=embed)
+    #await interaction.followup.send("done")
+    return
+
+
 @client.tree.command(name='setup')
 @app_commands.check(is_owner)
 async def setup(interaction: discord.Interaction,embed_color: str,role: discord.Role):
-    """Set up bot for this server"""
-    print("inside setup")
+    """Set up femdom bot for this server"""
     await interaction.response.defer(ephemeral=True)
+    print("inside setup")
     embed_color="0x"+embed_color
     embed_color_int=int(embed_color,16)
     role_name=role.name
