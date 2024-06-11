@@ -34,7 +34,7 @@ def check_command_permission(interaction: discord.Interaction):
 
 @client.tree.command()
 async def kiss(interaction: discord.Interaction,member:discord.Member):
-    """Kiss command"""
+    """Give a user a big smooch"""
     await interaction.response.defer(ephemeral=True)
     print('inside Kiss')
     if member.id==interaction.user.id:
@@ -44,23 +44,28 @@ async def kiss(interaction: discord.Interaction,member:discord.Member):
         await interaction.followup.send("You can't kiss a bot",ephemeral=True)
         return
 
+    nm1=interaction.user.name
+    nm2=member.name
+    if interaction.user.nick!=None:nm1=interaction.user.nick
+    if member.nick!=None:nm2=member.nick
+
     guild_id=str(interaction.guild_id)
-    embed=discord.Embed(color=db.get(guild_id,db.KEYS.EMBED_COLOR))
-    embed.description=f'<@{member.id}>'
+    embed=discord.Embed(color=db.get(guild_id,db.KEYS.EMBED_COLOR),title=f"{nm1} kisses {nm2}")
     gifs=[]
     with open("gifs/kisses.json") as f:
         gifs=json.load(f)
     url=gifs[random.randint(0,len(gifs)-1)]
+    #url="https://gifdb.com/images/thumbnail/sexy-kissing-vampire-diaries-tq7ylcy4y7cp3zf6.gif"
     print(f'url:{url},len:{len(gifs)}')
     embed.set_image(url=url)
-    await interaction.channel.send(embed=embed)
+    await interaction.channel.send(f"<@{member.id}>",embed=embed)
     await interaction.followup.send('done')
     
     #for url in gifs:
     #    embed.description=url
     #    embed.set_image(url=url)
     #    await interaction.channel.send(embed=embed)
-    #await interaction.followup.send("done")
+    await interaction.followup.send("done")
     return
 
 
